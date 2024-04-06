@@ -134,7 +134,8 @@ class SNMPClientProtocol(asyncio.DatagramProtocol):
                 "Received packet from %s:%d:\n%s", addr[0], addr[1], hexdump
             )
 
-        self.future.set_result(data)
+        if not self.future.cancelled():
+            self.future.set_result(data)
         if self.transport:
             self.transport.close()
 
@@ -146,7 +147,8 @@ class SNMPClientProtocol(asyncio.DatagramProtocol):
         if LOG.isEnabledFor(logging.DEBUG):
             LOG.debug("Error received!", exc_info=exc)
 
-        self.future.set_exception(exc)
+        if not self.future.cancelled():
+            self.future.set_exception(exc)
 
     async def get_data(self, timeout):
         # type: (int) -> bytes
